@@ -5,22 +5,19 @@ import com.tweetapp.model.Comments;
 import com.tweetapp.model.LikeTable;
 import com.tweetapp.model.Tweet;
 import com.tweetapp.model.Users;
-import com.tweetapp.model.utilityModel.ApiResponse;
 import com.tweetapp.model.utilityModel.TweetWithLikeComment;
-import com.tweetapp.repository.LikeRepository;
-import com.tweetapp.repository.TweetRepository;
+import com.tweetapp.repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
-public class LikeService {
+public class CommentService {
     @Autowired
-    private LikeRepository likeRepository;
+    private CommentRepository commentRepository;
 
     @Autowired
     private TweetService tweetService;
@@ -28,40 +25,38 @@ public class LikeService {
     @Autowired
     private UserService userService;
 
+    @Lazy
     @Autowired
-    private CommentService commentService;
+    private LikeService likeService;
 
-    public TweetWithLikeComment likeATweet(String username, Long tweetId) throws TweetAppException {
+    public TweetWithLikeComment commentATweet(Comments comments, String username, Long tweetId) throws TweetAppException {
         if(userService.usernameIsEmpty(username))
             throw new TweetAppException("Username doesn't exists");
         if(tweetService.tweetIsEmpty(tweetId))
             throw new TweetAppException("Tweet id doesn't exists");
-        likeRepository.save(LikeTable.builder()
-                        .tweetId(tweetId).username(username)
-                .build());
-
-        List<LikeTable> likeList = getByTweetId(tweetId);
+        comments.setUsername(username);
+        comments.setTweetId(tweetId);
+        comments.setDate(new Date());
+        commentRepository.saveAndFlush(comments);
+        //getTweet
+        Tweet tweet = tweetService.getTweetById(tweetId);
+        //getLikes
+        List<LikeTable> likeList = likeService.getByTweetId(tweetId);
         List<String> userList = likeList.stream().map(LikeTable::getUsername).toList();
         List<Users> usersList1 = userService.getAllUsersInList(userList);
-
-        //find bytweetId in comment
-        //add all comment to the list
-        // assign to the tweetWithLikeComment variable
-
-        List<Comments> commentsList = commentService.getByTweetId(tweetId);
-
-        Tweet tweet = tweetService.getTweetById(tweetId);
+        //getComments
+        List<Comments> commentList = getByTweetId(tweetId);
         return TweetWithLikeComment.builder()
                 .id(tweet.getId())
                 .userName(tweet.getUserName())
                 .tweets(tweet.getTweets())
                 .date(tweet.getDate())
                 .likedUsers(usersList1)
-                .commentsList(commentsList)
+                .commentsList(commentList)
                 .build();
     }
 
-    public List<LikeTable> getByTweetId(Long tweetId) {
-        return likeRepository.findByTweetId(tweetId);
+    public List<Comments> getByTweetId(Long tweetId) {
+        return commentRepository.findByTweetId(tweetId);
     }
 }
