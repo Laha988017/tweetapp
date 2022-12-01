@@ -1,11 +1,12 @@
 package com.tweetapp.controller;
 
 import com.tweetapp.exception.TweetAppException;
+import com.tweetapp.model.Users;
 import com.tweetapp.model.utilityModel.ApiResponse;
 import com.tweetapp.model.utilityModel.ChangePassword;
 import com.tweetapp.model.utilityModel.LoginModel;
-import com.tweetapp.model.Users;
 import com.tweetapp.service.UserService;
+import com.tweetapp.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> registerUser(@RequestBody Users users) throws TweetAppException {
         Users createdUser = userService.createUser(users);
@@ -32,12 +36,13 @@ public class UserController {
 
     @GetMapping("/login")
     public ResponseEntity<ApiResponse> loginUser(@RequestBody LoginModel users) throws TweetAppException {
-        Users u = userService.login(users);
-        if(u!=null)
+        String jwt = userService.login(users);
+        log.info("Jwt - "+jwt);
+        if(jwt!=null)
             return ResponseEntity.ok(ApiResponse.builder()
                             .status(200)
                             .message("Login successful")
-                            .data(u)
+                            .data(jwt)
                     .build());
         return ResponseEntity.badRequest().body(ApiResponse.builder()
                         .status(400).message("Login unsuccessful")

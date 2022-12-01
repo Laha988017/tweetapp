@@ -1,20 +1,43 @@
 package com.tweetapp.service;
 
 import com.tweetapp.exception.TweetAppException;
+import com.tweetapp.model.Users;
 import com.tweetapp.model.utilityModel.ChangePassword;
 import com.tweetapp.model.utilityModel.LoginModel;
-import com.tweetapp.model.Users;
+import com.tweetapp.model.utilityModel.MyUserDetails;
 import com.tweetapp.repository.UsersRepository;
+import com.tweetapp.util.JwtUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserService {
+@Slf4j
+@Component("userDetailsImpl")
+public class UserService implements UserDetailsService {
     @Autowired
     private UsersRepository usersRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
 
     public Users createUser(Users users) throws TweetAppException {
         if(users == null){
@@ -27,15 +50,34 @@ public class UserService {
         if(usersRepository.findByUsername(users.getUsername()).isPresent()){
             throw new TweetAppException("Username already exists");
         }
+        users.setPassword(passwordEncoder.encode(users.getPassword()));
         return usersRepository.saveAndFlush(users);
     }
 
-    public Users login(LoginModel user) throws TweetAppException {
-        Optional<Users> users = usersRepository.findByEmail(user.getEmail());
-        if(users.isEmpty())
-            throw new TweetAppException("Email address not present");
-        Users u = users.get();
-        return u.getPassword().equals(user.getPassword())?u:null;
+    public String login(LoginModel user) throws TweetAppException {
+//        Optional<Users> users = usersRepository.findByEmail(user.getEmail());
+//        if(users.isEmpty())
+//            throw new TweetAppException("Email address not present");
+//        Users u = users.get();
+//        log.info(u.toString());
+//        return passwordEncoder.encode(u.getPassword()).equals(user.getPassword())?u:null;
+
+        String userEmail = user.getEmail();
+        String password = user.getPassword();
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userEmail, password));
+        } catch (BadCredentialsException e) {
+            throw new TweetAppException("Incorrect Username or Password", e.getCause());
+        }
+
+        final UserDetails userDetails = loadUserByUsername(userEmail);
+
+        final String jwt = jwtUtil.generateToken(userDetails);
+
+        Optional<Users> loggedUser = usersRepository.findByUsername(userEmail);
+
+        return jwt;
+
     }
 
     public Users updatePassword(ChangePassword cp,String username) throws TweetAppException {
@@ -62,13 +104,24 @@ public class UserService {
         return usersRepository.findByUsernameContains(username);
     }
 
-    public Users getUserByUsername(String username) throws TweetAppException {
+    public Users getUserByEmail(String username) throws TweetAppException {
         if(usernameIsEmpty(username))
             throw new TweetAppException("Username Invalid");
-        return usersRepository.findByUsername(username).get();
+        return usersRepository.findByEmail(username).get();
     }
 
     public List<Users> getAllUsersInList(List<String> usernames){
         return usersRepository.findByUsernameIn(usernames);
+    }
+
+
+    @Override
+    public UserDetails loadUserByUsername(String userEmail) throws UsernameNotFoundException {
+        Optional<Users> user = usersRepository.findByEmail(userEmail);
+
+        if(user.isEmpty())
+            throw new UsernameNotFoundException("Email not present");
+
+        return user.map(MyUserDetails::new).get();
     }
 }
