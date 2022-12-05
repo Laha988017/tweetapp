@@ -40,6 +40,7 @@ public class Config extends WebSecurityConfigurerAdapter {
                 .antMatchers("/").permitAll()
                 .antMatchers("/api/v1.0/tweets/register").permitAll()
                 .antMatchers("/api/v1.0/tweets/login").permitAll()
+                .antMatchers("/**/forgot").permitAll()
                 .antMatchers("/swagger-ui.html/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
                 .antMatchers("/actuator/**").permitAll()

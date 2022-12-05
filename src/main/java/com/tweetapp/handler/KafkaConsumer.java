@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class KafkaConsumer {
 
-	@KafkaListener(topics = "PasswordChangeTopic", groupId = "twitter-group")
+	@KafkaListener(topics = "ChangePasswordTopic", groupId = "tweetApp")
 	public void listenToCodeDecodeKafkaTopic(String messageReceived) {
 		log.info("Message received, The user trying to change password:" + messageReceived);
 	}

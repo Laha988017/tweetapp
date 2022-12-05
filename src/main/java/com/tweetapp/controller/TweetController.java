@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 @RestController
@@ -43,7 +44,7 @@ public class TweetController {
     }
 
     @PostMapping("/{username}/add")
-    public ResponseEntity<ApiResponse> postTweetForAUser(@RequestBody Tweet tweet, @PathVariable String username) throws TweetAppException {
+    public ResponseEntity<ApiResponse> postTweetForAUser(@Valid @RequestBody Tweet tweet, @PathVariable String username) throws TweetAppException {
         Tweet createdTweet = tweetService.createATweet(tweet,username);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{tweetId}").buildAndExpand(createdTweet.getId()).toUri();
         return ResponseEntity.created(uri).body(ApiResponse.builder()
@@ -52,7 +53,7 @@ public class TweetController {
     }
 
     @PutMapping("{username}/update/{tweetId}")
-    public ResponseEntity<ApiResponse> updateTweet(@RequestBody Tweet tweet, @PathVariable String username, @PathVariable Long tweetId) throws TweetAppException {
+    public ResponseEntity<ApiResponse> updateTweet(@Valid @RequestBody Tweet tweet, @PathVariable String username, @PathVariable Long tweetId) throws TweetAppException {
         Tweet tweet1 = tweetService.updateATweet(username,tweetId,tweet);
         return ResponseEntity.ok(ApiResponse.builder()
                 .status(200).message("Tweets Updated successfully for user "+username).data(tweet1)

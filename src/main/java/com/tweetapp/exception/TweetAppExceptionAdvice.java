@@ -1,7 +1,6 @@
 package com.tweetapp.exception;
 
 import com.tweetapp.model.utilityModel.ApiResponse;
-import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,18 +18,13 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class TweetAppExceptionAdvice extends ResponseEntityExceptionHandler {
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(TweetAppException.class)
     public ResponseEntity<ApiResponse> exceptionTweetApp(TweetAppException exception) {
         return ResponseEntity.internalServerError().body(ApiResponse.builder()
                         .status(500).message(exception.getLocalizedMessage())
                 .build());
     }
-    @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<ApiResponse> exceptionJwt(ExpiredJwtException exception) {
-        return ResponseEntity.internalServerError().body(ApiResponse.builder()
-                .status(500).message(exception.getLocalizedMessage())
-                .build());
-    }
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
                                                                   HttpHeaders headers, HttpStatus status, WebRequest request) {

@@ -11,7 +11,7 @@ public class KafkaProducer {
 	private KafkaTemplate<String, String> kafkaTemplate;
 
 	public void sendMessageToTopic(String message) {
-		kafkaTemplate.send("PasswordChangeTopic", message);
+		kafkaTemplate.send("ChangePasswordTopic", message);
 	}
 	
 	/* 

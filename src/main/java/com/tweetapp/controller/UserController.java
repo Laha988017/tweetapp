@@ -1,6 +1,5 @@
 package com.tweetapp.controller;
 
-import com.sun.istack.NotNull;
 import com.tweetapp.exception.TweetAppException;
 import com.tweetapp.handler.KafkaProducer;
 import com.tweetapp.model.Users;
@@ -15,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +34,7 @@ public class UserController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse> registerUser(@RequestBody @NotNull Users users) throws TweetAppException {
+    public ResponseEntity<ApiResponse> registerUser(@RequestBody @Valid Users users) throws TweetAppException {
         Users createdUser = userService.createUser(users);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{loginId}").buildAndExpand(createdUser.getId()).toUri();
         log.info("User created successfully");
@@ -42,7 +42,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse> loginUser(@RequestBody LoginModel users) throws TweetAppException {
+    public ResponseEntity<ApiResponse> loginUser(@Valid @RequestBody LoginModel users) throws TweetAppException {
         Map<String, Object> response = userService.login(users);
         log.info("Jwt - "+response.get("jwt"));
         if(response.get("jwt")!=null)
@@ -57,7 +57,7 @@ public class UserController {
     }
 
     @PostMapping("/{username}/forgot")
-    public ResponseEntity<ApiResponse> changePassword(@PathVariable String username, @RequestBody ChangePassword cp)
+    public ResponseEntity<ApiResponse> changePassword(@PathVariable String username, @Valid @RequestBody ChangePassword cp)
             throws TweetAppException {
         log.info("Entered changePassword");
         kafkaProducer.sendMessageToTopic(username); // start kafka

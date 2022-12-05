@@ -85,7 +85,7 @@ public class UserService implements UserDetailsService {
         if(passwordEncoder.matches(users.getPassword(),cp.getOldPassword()))
             throw new TweetAppException("Old Password mismatch");
 
-        users.setPassword(cp.getNewPassword());
+        users.setPassword(passwordEncoder.encode(cp.getNewPassword()));
         return usersRepository.saveAndFlush(users);
     }
 
