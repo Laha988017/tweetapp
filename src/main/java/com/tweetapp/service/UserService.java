@@ -19,7 +19,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -54,14 +56,7 @@ public class UserService implements UserDetailsService {
         return usersRepository.saveAndFlush(users);
     }
 
-    public String login(LoginModel user) throws TweetAppException {
-//        Optional<Users> users = usersRepository.findByEmail(user.getEmail());
-//        if(users.isEmpty())
-//            throw new TweetAppException("Email address not present");
-//        Users u = users.get();
-//        log.info(u.toString());
-//        return passwordEncoder.encode(u.getPassword()).equals(user.getPassword())?u:null;
-
+    public Map<String, Object> login(LoginModel user) throws TweetAppException {
         String userEmail = user.getEmail();
         String password = user.getPassword();
         try {
@@ -74,9 +69,11 @@ public class UserService implements UserDetailsService {
 
         final String jwt = jwtUtil.generateToken(userDetails);
 
-        Optional<Users> loggedUser = usersRepository.findByUsername(userEmail);
-
-        return jwt;
+        Optional<Users> loggedUser = usersRepository.findByEmail(userEmail);
+        Map<String, Object> response = new HashMap<>();
+        response.put("username", loggedUser.get().getUsername());
+        response.put("jwt", jwt);
+        return response;
 
     }
 
@@ -85,8 +82,8 @@ public class UserService implements UserDetailsService {
             throw new TweetAppException("Username is not found");
 
         Users users = usersRepository.findByUsername(username).get();
-        if(!users.getPassword().equals(cp.getOldPassword()))
-            throw new TweetAppException("Username is not found");
+        if(passwordEncoder.matches(users.getPassword(),cp.getOldPassword()))
+            throw new TweetAppException("Old Password mismatch");
 
         users.setPassword(cp.getNewPassword());
         return usersRepository.saveAndFlush(users);

@@ -48,8 +48,8 @@ public class CommentService {
         List<Comments> commentList = getByTweetId(tweetId);
         return TweetWithLikeComment.builder()
                 .id(tweet.getId())
-                .userName(tweet.getUserName())
-                .tweets(tweet.getTweets())
+                .userName(tweet.getUsername())
+                .tweets(tweet.getTweet())
                 .date(tweet.getDate())
                 .likedUsers(usersList1)
                 .commentsList(commentList)

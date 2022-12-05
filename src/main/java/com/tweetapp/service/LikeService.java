@@ -5,17 +5,12 @@ import com.tweetapp.model.Comments;
 import com.tweetapp.model.LikeTable;
 import com.tweetapp.model.Tweet;
 import com.tweetapp.model.Users;
-import com.tweetapp.model.utilityModel.ApiResponse;
 import com.tweetapp.model.utilityModel.TweetWithLikeComment;
 import com.tweetapp.repository.LikeRepository;
-import com.tweetapp.repository.TweetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class LikeService {
@@ -53,8 +48,8 @@ public class LikeService {
         Tweet tweet = tweetService.getTweetById(tweetId);
         return TweetWithLikeComment.builder()
                 .id(tweet.getId())
-                .userName(tweet.getUserName())
-                .tweets(tweet.getTweets())
+                .userName(tweet.getUsername())
+                .tweets(tweet.getTweet())
                 .date(tweet.getDate())
                 .likedUsers(usersList1)
                 .commentsList(commentsList)

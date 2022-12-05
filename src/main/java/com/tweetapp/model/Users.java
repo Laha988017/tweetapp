@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.Objects;
 
 @Getter
@@ -19,13 +20,21 @@ public class Users {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id", nullable = false)
 	private Long id;
+	@Column(nullable = false)
 	private String email;
-	@Column(unique = true)
+	@Column(unique = true,nullable = false)
 	private String username;
+	@Column(nullable = false)
 	private String firstName;
 	private String lastName;
+	@Column(nullable = false)
 	private String password;
+	@Column(nullable = false)
 	private String contactNumber;
+	@Column(nullable = true)
+	private Date dob;
+	@Column(nullable = true)
+	private String gender;
 
 	@Override
 	public boolean equals(Object o) {

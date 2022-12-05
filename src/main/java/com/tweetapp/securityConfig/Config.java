@@ -37,6 +37,7 @@ public class Config extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 //.antMatchers("/api/v1.0/tweets/**").hasRole("USER")
+                .antMatchers("/").permitAll()
                 .antMatchers("/api/v1.0/tweets/register").permitAll()
                 .antMatchers("/api/v1.0/tweets/login").permitAll()
                 .antMatchers("/swagger-ui.html/**").permitAll()
@@ -59,5 +60,4 @@ public class Config extends WebSecurityConfigurerAdapter {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1.0/tweets")
+@CrossOrigin("*")
 public class CommentController {
     @Autowired
     private CommentService commentService;

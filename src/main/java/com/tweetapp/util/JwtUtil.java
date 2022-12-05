@@ -1,6 +1,7 @@
 package com.tweetapp.util;
 
 
+import com.tweetapp.exception.TweetAppException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -17,7 +18,7 @@ import java.util.function.Function;
 @Slf4j
 public class JwtUtil {
 
-	private String SECRET_KEY = "secret";
+	private final String SECRET_KEY = "secret";
 
 	public String extractUsername(String token) {
 		return extractClaim(token, Claims::getSubject);
@@ -54,7 +55,11 @@ public class JwtUtil {
 
 	public Boolean validateToken(String token, UserDetails userDetails) {
 		final String userEmail = extractUsername(token);
-		return (userEmail.equals(userDetails.getUsername()) && !isTokenExpired(token));
+		try {
+			return (userEmail.equals(userDetails.getUsername()) && !isTokenExpired(token));
+		}catch (TweetAppException e){
+			throw new TweetAppException(e.getLocalizedMessage());
+		}
 	}
 
 }

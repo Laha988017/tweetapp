@@ -1,6 +1,8 @@
 package com.tweetapp.controller;
 
+import com.sun.istack.NotNull;
 import com.tweetapp.exception.TweetAppException;
+import com.tweetapp.handler.KafkaProducer;
 import com.tweetapp.model.Users;
 import com.tweetapp.model.utilityModel.ApiResponse;
 import com.tweetapp.model.utilityModel.ChangePassword;
@@ -15,7 +17,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+@CrossOrigin("*")
 @RestController
 @Slf4j
 @RequestMapping("/api/v1.0/tweets")
@@ -25,36 +29,43 @@ public class UserController {
 
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    KafkaProducer kafkaProducer;
+
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse> registerUser(@RequestBody Users users) throws TweetAppException {
+    public ResponseEntity<ApiResponse> registerUser(@RequestBody @NotNull Users users) throws TweetAppException {
         Users createdUser = userService.createUser(users);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{loginId}").buildAndExpand(createdUser.getId()).toUri();
         log.info("User created successfully");
         return ResponseEntity.created(uri).body(ApiResponse.builder().status(201).message("User registered successfully").data(createdUser.getUsername()).build());
     }
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<ApiResponse> loginUser(@RequestBody LoginModel users) throws TweetAppException {
-        String jwt = userService.login(users);
-        log.info("Jwt - "+jwt);
-        if(jwt!=null)
+        Map<String, Object> response = userService.login(users);
+        log.info("Jwt - "+response.get("jwt"));
+        if(response.get("jwt")!=null)
             return ResponseEntity.ok(ApiResponse.builder()
                             .status(200)
                             .message("Login successful")
-                            .data(jwt)
+                            .data(response)
                     .build());
         return ResponseEntity.badRequest().body(ApiResponse.builder()
                         .status(400).message("Login unsuccessful")
                 .build());
     }
 
-    @GetMapping("/{username}/forgot")
-    public ResponseEntity<ApiResponse> changePassword(@PathVariable String username, @RequestBody ChangePassword cp) throws TweetAppException {
-        Users u = userService.updatePassword(cp,username);
-        return ResponseEntity.ok().body(ApiResponse.builder()
-                .status(200).message("Password reset successful").data(u)
-                .build());
+    @PostMapping("/{username}/forgot")
+    public ResponseEntity<ApiResponse> changePassword(@PathVariable String username, @RequestBody ChangePassword cp)
+            throws TweetAppException {
+        log.info("Entered changePassword");
+        kafkaProducer.sendMessageToTopic(username); // start kafka
+        Users user = userService.updatePassword(cp, username);
+        log.info("Password reset successful");
+        return ResponseEntity.ok()
+                .body(ApiResponse.builder().status(200).message("Password reset successful").data(user).build());
+
     }
 
     @GetMapping("/user/search/{username}")

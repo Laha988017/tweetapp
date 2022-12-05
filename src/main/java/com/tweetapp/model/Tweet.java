@@ -15,13 +15,16 @@ import java.util.Objects;
 @NoArgsConstructor
 @Entity
 public class Tweet {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id", nullable = false)
 	private Long id;
-	private String userName;
-	private String tweets;
+	@Column(nullable = false)
+	private String username;
+	@Column(nullable = false)
+	private String tweet;
+	@Column(nullable = true)
 	private Date date;
 
 	@Override

@@ -1,7 +1,9 @@
 package com.tweetapp.filters;
 
+import com.tweetapp.exception.TweetAppException;
 import com.tweetapp.service.UserService;
 import com.tweetapp.util.JwtUtil;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,6 +28,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	@Autowired
 	private JwtUtil jwtUtil;
 
+	@SneakyThrows
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
@@ -36,7 +39,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
 		if(authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
 			jwt = authorizationHeader.substring(7);
-			userName = jwtUtil.extractUsername(jwt);
+			try {
+				userName = jwtUtil.extractUsername(jwt);
+			}catch (TweetAppException e){
+				throw new TweetAppException(e.getLocalizedMessage());
+			}
 		}
 
 		if(userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {

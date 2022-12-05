@@ -1,6 +1,6 @@
 package com.tweetapp.exception;
 
-public class TweetAppException extends Exception{
+public class TweetAppException extends RuntimeException{
     public TweetAppException(String message) {
         super(message);
     }

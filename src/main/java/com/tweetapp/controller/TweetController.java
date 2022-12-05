@@ -1,9 +1,11 @@
 package com.tweetapp.controller;
 
 import com.tweetapp.exception.TweetAppException;
-import com.tweetapp.model.utilityModel.ApiResponse;
 import com.tweetapp.model.Tweet;
+import com.tweetapp.model.utilityModel.ApiResponse;
+import com.tweetapp.model.utilityModel.TweetWithLikeComment;
 import com.tweetapp.service.TweetService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,13 +15,16 @@ import java.net.URI;
 import java.util.List;
 @RestController
 @RequestMapping("/api/v1.0/tweets")
+@CrossOrigin("*")
+@Slf4j
 public class TweetController {
     @Autowired
     private TweetService tweetService;
 
     @GetMapping("/all")
     public ResponseEntity<ApiResponse> getAllTweets() throws TweetAppException {
-        List<Tweet> tweetList = tweetService.getAllTweets();
+        List<TweetWithLikeComment> tweetList = tweetService.getAllTweets();
+        log.info(tweetList.toString());
         if(tweetList.isEmpty())
             throw new TweetAppException("There are no tweets available");
         return ResponseEntity.ok(ApiResponse.builder()
@@ -29,7 +34,7 @@ public class TweetController {
 
     @GetMapping("/{username}")
     public ResponseEntity<ApiResponse> getAllTweetsForAUser(@PathVariable String username) throws TweetAppException {
-        List<Tweet> tweetList = tweetService.getAllTweetsForAUser(username);
+        List<TweetWithLikeComment> tweetList = tweetService.getAllTweetsForAUser(username);
         if(tweetList.isEmpty())
             throw new TweetAppException("There are no tweets available");
         return ResponseEntity.ok(ApiResponse.builder()

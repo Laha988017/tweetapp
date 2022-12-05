@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface TweetRepository extends JpaRepository<Tweet,Long> {
     Optional<Tweet> findById(Long id);
 
-    List<Tweet> findByUserName(String username);
+    List<Tweet> findByUsername(String username);
 }
