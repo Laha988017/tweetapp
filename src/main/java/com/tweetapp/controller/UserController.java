@@ -1,7 +1,7 @@
 package com.tweetapp.controller;
 
 import com.tweetapp.exception.TweetAppException;
-import com.tweetapp.handler.KafkaProducer;
+//import com.tweetapp.handler.KafkaProducer;
 import com.tweetapp.model.Users;
 import com.tweetapp.model.utilityModel.ApiResponse;
 import com.tweetapp.model.utilityModel.ChangePassword;
@@ -29,8 +29,8 @@ public class UserController {
 
     @Autowired
     private JwtUtil jwtUtil;
-    @Autowired
-    KafkaProducer kafkaProducer;
+//    @Autowired
+//    KafkaProducer kafkaProducer;
 
 
     @PostMapping("/register")
@@ -60,7 +60,7 @@ public class UserController {
     public ResponseEntity<ApiResponse> changePassword(@PathVariable String username, @Valid @RequestBody ChangePassword cp)
             throws TweetAppException {
         log.info("Entered changePassword");
-        kafkaProducer.sendMessageToTopic(username); // start kafka
+//        kafkaProducer.sendMessageToTopic(username); // start kafka
         Users user = userService.updatePassword(cp, username);
         log.info("Password reset successful");
         return ResponseEntity.ok()
