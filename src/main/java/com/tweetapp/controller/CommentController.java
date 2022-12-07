@@ -20,7 +20,7 @@ public class CommentController {
     @PostMapping(("/{username}/reply/{tweetId}"))
     public ResponseEntity<ApiResponse> commentATweet(@Valid @RequestBody Comments comments, @PathVariable String username, @PathVariable Long tweetId) throws TweetAppException {
         return ResponseEntity.ok(ApiResponse.builder()
-                .status(200).message("Liked the tweet")
+                .status(200).message("Commented the tweet")
                 .data(commentService.commentATweet(comments,username,tweetId))
                 .build());
     }
