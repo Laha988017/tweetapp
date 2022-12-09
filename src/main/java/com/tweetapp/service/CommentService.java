@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentService {
@@ -42,7 +43,7 @@ public class CommentService {
         Tweet tweet = tweetService.getTweetById(tweetId);
         //getLikes
         List<LikeTable> likeList = likeService.getByTweetId(tweetId);
-        List<String> userList = likeList.stream().map(LikeTable::getUsername).toList();
+        List<String> userList = likeList.stream().map(LikeTable::getUsername).collect(Collectors.toList());
         List<Users> usersList1 = userService.getAllUsersInList(userList);
         //getComments
         List<Comments> commentList = getByTweetId(tweetId);

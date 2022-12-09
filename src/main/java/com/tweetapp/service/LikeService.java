@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LikeService {
@@ -36,7 +37,7 @@ public class LikeService {
                 .build());
 
         List<LikeTable> likeList = getByTweetId(tweetId);
-        List<String> userList = likeList.stream().map(LikeTable::getUsername).toList();
+        List<String> userList = likeList.stream().map(LikeTable::getUsername).collect(Collectors.toList());
         List<Users> usersList1 = userService.getAllUsersInList(userList);
 
         //find bytweetId in comment
